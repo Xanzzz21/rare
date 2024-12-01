@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>OinkCoin</title>
+    
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Add Monetag script -->
+    <!-- <script src='//niphaumeenses.net/vignette.min.js' data-zone='8462762' data-sdk='show_8462762'></script> -->
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="tonconnect.js?v=3.4"></script>
+    <script src="ton-payments.js?v=3.4"></script>
+    <link rel="stylesheet" href="oinkcoin.css?v=85.8">
+    <!-- Add the AdsGram script in the head section -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <!-- Add these meta tags in the head section -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: telegram.org *.telegram.org; img-src 'self' data: https:; connect-src 'self' https:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: telegram.org *.telegram.org; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none';">
+    
+    <!-- Add this style tag -->
+    <style>
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Add this right after the opening <body> tag -->
+    <script>
+        // Check if running inside Telegram WebApp
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            // Redirect to Telegram bot if not running in Telegram WebApp
+            window.location.replace('https://t.me/oinkcoinbot/oinkcoinweb');
+        }
+    </script>
+
+    <!-- Update the loading screen div -->
+    <div id="loading-screen">
+        <img src="img/PigNose.webp" alt="Loading" id="loading-image">
+        <p>Loading OinkCoin...</p>
+    </div>
+
+    <!-- Update the dailyRewardPage div -->
+    <div id="dailyRewardPage" style="display: none;">
+        <div id="dailyRewardOverlay"></div>
+        <div id="dailyRewardContent">
+            <div id="moneyBagContainer">
+                <img src="img/Money-Bag.webp" alt="Money Bag" id="moneyBagImage">
+            </div>
+            <h1 id="dailyRewardTitle">Your Daily Reward</h1>
+            <p id="dailyRewardDescription">Come back every day to claim your reward!</p>
+            <p id="dailyRewardAmount"></p>
+            <button id="dailyRewardContinue">Continue</button>
+        </div>
+    </div>
+
+    <div id="app" style="display: none;"> <!-- Hide the app initially -->
+        <!-- Main Game Page -->
+        <div id="gamePage" class="page-content active">
+            <main>
+                <div id="profile-summary">
+                    <div id="profile-icon">
+                        <span id="profile-initial"></span>
+                    </div>
+                    <div id="profile-info">
+                        <span id="profile-name"></span><br>
+                        <span id="profile-balance">
+                            <span id="balance-label"></span>&nbsp;<span id="profile-balance-amount"></span>
+                        </span>                        
+                    </div>
+                    <!-- New shop button -->
+                    <button id="shopButton" class="shop-button"><i class="fas fa-store"></i></button>
+                </div>
+                
+                <div id="transaction-summary">
+                    <h2 id="your-transactions"></h2>
+                    <p id="convert-rating"></p>
+                </div>
+                <div id="balance-card">
+                    <h3 id="coin-count">0</h3>
+                    <p id="your-balance"></p>
+                </div>
+                <div id="pig-container">
+                    <div id="pig-hitbox">
+                        <img src="img/pigcoin.webp" alt="Pig" id="pig">
+                    </div>
+                    <div id="coin-container"></div>
+                </div>
+                <!-- Add this right after the #pig-container div -->
+                <div id="tap-progress-container">
+                    <div id="tap-progress-bar"></div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Rewards Page -->
+        <div id="rewardsPage" class="page-content">
+            <main>
+                <!-- New task summary div above invite-task-links -->
+                <div id="task-summary">
+                    <p id="invite-friends-to-earn" class="centered">Invite friends to earn</p>
+                </div>
+                <!-- New Invite Friend Task -->
+                <div id="invite-task-links">
+                    <div class="task-item" id="invite-friend-task">
+                        <img src="img/friends.webp" alt="Invite Friend" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title">Invite a Friend</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- New publish story task -->
+                    <div class="task-item" id="publish-story-task">
+                        <img src="img/stories.webp" alt="Publish Story" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="publish-story-title">Publish a Story</div>
+                            <div class="task-reward">
+                                +5,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <!-- Inside #invite-task-links, after publish-story-task -->
+                    <div class="task-item" id="watch-ad-task">
+                        <img src="img/video-ad.webp" alt="Watch Ad" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="watch-ad-title">Watch Video Ad</div>
+                            <div class="task-reward">
+                                +2,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <!-- Add this inside the #invite-task-links div, after the existing tasks -->
+                    <div class="task-item" id="ton-payment-task">
+                        <img src="img/tonlogo.webp" alt="TON Payment" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="ton-payment-title">Pay with TON</div>
+                            <div class="task-reward">
+                                +20,000 <img src="img/coin_pig.png" alt="Coin"> +10 <img src="img/ticket.webp" alt="Ticket">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Existing task summary div -->
+                <div id="task-summary">
+                    <p id="complete-tasks-to-earn" class="centered"></p>
+                </div>
+                <div id="task-links">
+                    <div class="task-item" data-channel="oinkcoinchannel">
+                        <img src="img/oinkcointelegramchannel.webp" alt="Oink Coin" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="oinkcoin-channel">Join OinkCoin Channel</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="task-item" data-channel="oinkcoinTwitter">
+                        <img src="img/twitter.png" alt="Oink Coin Twitter" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="follow-twitter">Subcribe to Twitter</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="task-item" data-channel="aireviewgames">
+                        <img src="img/aireview.png" alt="AI Review" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="ai-review-games">Join AI Review Games</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="task-item" data-channel="limegame">
+                        <img src="img/LIMElogo.PNG" alt="LIME Game" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="lime-game">Play LIME Game</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="task-item" data-channel="fortniteShop">
+                        <img src="img/fortnite-cart.png" alt="Fortnite Shop" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="fortnite-shop">Today's Fortnite Shop</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <!-- New task item -->
+                    <div class="task-item" data-channel="dreamedbot">
+                        <img src="img/dreamed.jpg" alt="Dreamed Bot" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="dreamed-bot">Join Dreamed Bot</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <!-- New task item for Coin Heaven Channel -->
+                    <div class="task-item" data-channel="coinheavenchannel">
+                        <img src="img/CoinHaven.JPG" alt="Coin Heaven Channel" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="coin-heaven-channel">Join Coin Heaven</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <!-- New task item for Coin Heaven Bot -->
+                    <div class="task-item" data-channel="c">
+                        <img src="img/CoinHaven.JPG" alt="Coin Heaven Bot" class="task-logo">
+                        <div class="task-info">
+                            <div class="task-title" id="coin-heaven-bot">Open Coin Heaven Bot</div>
+                            <div class="task-reward">
+                                +1,000 <img src="img/coin_pig.png" alt="Coin">
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <!-- Add this inside the #task-links div, after the existing tasks -->
+                </div>
+            </main>
+        </div>
+
+        <!-- Shop Page -->
+        <div id="shopPage" class="page-content">
+            <main>
+                <div id="current-profile">
+                    <div id="shop-profile-icon">
+                        <span id="shop-profile-initial"></span>
+                    </div>
+                    <div id="shop-profile-info">
+                        <span id="shop-profile-name"></span><br>
+                        <span id="shop-profile-balance">
+                            <span id="shop-balance-label"></span>&nbsp;<span id="shop-profile-balance-amount"></span>
+                        </span>
+                    </div>
+                </div>
+                <div id="gradient-list-container">
+                    <h2 id="available-gradients"></h2>
+                    <div id="gradient-list-wrapper">
+                        <div id="gradient-list"></div>
+                    </div>
+                </div>
+                <!-- New coin shop section -->
+                <div id="coin-shop-container">
+                    <h2 id="available-coins">Available Coins</h2>
+                    <div id="coin-list-wrapper">
+                        <div id="coin-list"></div>
+                    </div>
+                </div>
+                <!-- Inside the shopPage div, after the coin-shop-container -->
+                <div id="emblem-shop-container">
+                    <h2 id="available-emblems">Available Emblems</h2>
+                    <div id="emblem-list-wrapper">
+                        <div id="emblem-list"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Profile Modal -->
+        <div id="profile-modal">
+            <div id="profile-modal-content">
+                <div id="profile-modal-header">
+                    <h2 id="profile-modal-name"></h2>
+                    <div class="profile-modal-underline"></div>
+                    <p id="profile-modal-balance"></p>
+                    <p id="profile-modal-balance-label"></p>
+                </div>
+                <div class="wallet-button-container">
+                    <button id="connectTonWalletButton">
+                        <img src="img/Wallet-Fill.svg" alt="Wallet Icon" class="wallet-icon">
+                        <span>Connect TON Wallet</span>
+                    </button>
+                </div>
+                <p id="walletAddress"></p>
+                <button id="profile-modal-close"></button>
+            </div>
+        </div>
+        <div id="profile-modal-overlay"></div>
+
+        <div id="leaderboardPage" class="page-content">
+            <main>
+                <div id="leaderboard-container">
+                    <ul id="leaderboard-list">
+                        <!-- Dynamically generated leaderboard items go here -->
+                    </ul>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <footer id="tabBar">
+            <button id="gameTabButton" class="tab-button active"><i class="fas fa-home"></i> <span id="earn"></span></button>
+            <button id="leaderboardTabButton" class="tab-button"><i class="fas fa-trophy"></i> <span id="leaderboard-tab"></span></button>
+            <button id="gamesTabButton" class="tab-button"><i class="fa-solid fa-gift"></i> <span id="games-tab"></span></button>
+            <button id="rewardsTabButton" class="tab-button"><i class="fa-solid fa-star"></i> <span id="rewards-tab"></span></button>
+        </footer>
+    </div>
+
+    <!-- Invite Modal -->
+    <div id="invite-modal">
+        <div id="invite-modal-content">
+            <button id="invite-modal-close"><i class="fas fa-times"></i></button>
+            <h2>Invite Friends</h2>
+            <button id="inviteButton">Invite Now</button>
+            <button id="copyInviteLink">Copy Invite Link</button>
+        </div>
+    </div>
+    <div id="invite-modal-overlay"></div>
+
+    <script src="translations.js?v=1.6"></script>
+    <script src="oink.js?v=117.5"></script>
+    <script src="gamespage.js?v=7.3"></script>
+    <script src="comboday.js?v=5.5"></script>
+    <script src="stories.js?v=1.9"></script>
+    <script src="wheeloffortune.js?v=11.1"></script>
+    <input type="hidden" id="csrf_token" value="<?php echo $csrfToken; ?>">
+</body>
+</html>
